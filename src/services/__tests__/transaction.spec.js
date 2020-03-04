@@ -41,7 +41,7 @@ describe('Transaction Service', () => {
     it('Should NOT create transaction (missing required field)', async () => {
       const transaction = await factory.build('Transaction');
 
-      delete transaction.name;
+      delete transaction.description;
 
       await TransactionService.create(transaction).catch(err => {
         expect(err).toBeDefined();

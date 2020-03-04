@@ -1,14 +1,14 @@
 import { connect } from 'mongoose';
 
-let db;
+let database;
 
 const up = async () => {
-  db = await connect(process.env.MONGO_URL, {
+  database = await connect(process.env.MONGO_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
 };
 
-const down = () => db.disconnect();
+const down = () => database.disconnect();
 
 export { up, down };
