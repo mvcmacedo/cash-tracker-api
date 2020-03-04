@@ -16,11 +16,9 @@ const TransactionSchema = new Schema(
     location: {
       latitude: {
         type: String,
-        required: true,
       },
       longitude: {
         type: String,
-        required: true,
       },
     },
     method: {

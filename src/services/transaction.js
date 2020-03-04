@@ -9,11 +9,23 @@ class TransactionService {
     return TransactionModel.find(filters);
   }
 
-  static update(filters = {}, data = {}) {
-    return TransactionModel.updateMany(filters, { $set: data });
+  static update(filters, data = {}) {
+    if (!filters) {
+      throw new Error('Filters not found');
+    }
+
+    return TransactionModel.updateMany(
+      filters,
+      { $set: data },
+      { runValidators: true }
+    );
   }
 
-  static delete(filters = {}) {
+  static delete(filters) {
+    if (!filters) {
+      throw new Error('Filters not found');
+    }
+
     return TransactionModel.deleteMany(filters);
   }
 }
