@@ -1,6 +1,10 @@
 import { Schema, model } from 'mongoose';
 
-import { transactionMethods, transactionTypes } from '../enums';
+import {
+  transactionTypes,
+  transactionMethods,
+  transactionFrequency,
+} from '../enums';
 
 const TransactionSchema = new Schema(
   {
@@ -28,13 +32,17 @@ const TransactionSchema = new Schema(
     type: {
       type: String,
       enum: Object.values(transactionTypes),
-      default: transactionTypes.CASHOUT,
+      required: true,
+    },
+    frequency: {
+      type: String,
+      enum: Object.values(transactionFrequency),
       required: true,
     },
     date: {
       type: Date,
       required: true,
-      default: new Date().toISOString(),
+      default: new Date(),
     },
     category: {
       type: Schema.Types.ObjectId,

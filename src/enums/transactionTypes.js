@@ -2,4 +2,5 @@ export default {
   CASHIN: 'CASH_IN',
   CASHOUT: 'CASH_OUT',
   INVESTMENT: 'INVESTMENT',
+  CREDIT: 'CREDIT_CARD',
 };
