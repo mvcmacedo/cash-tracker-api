@@ -1,5 +1,7 @@
 import { CategoryService } from '..';
 
+import { CustomError } from '../../helpers';
+
 import { CategoryModel } from '../../models';
 
 import factory from '../../__tests__/factory';
@@ -20,15 +22,15 @@ describe('Category Service', () => {
     it('Should NOT create category (model error)', async () => {
       const spy = jest
         .spyOn(CategoryModel, 'create')
-        .mockImplementation(() => {
+        .mockImplementation(async () => {
           throw new Error();
         });
 
-      try {
-        await CategoryService.create();
-      } catch (err) {
+      await CategoryService.create().catch(err => {
         expect(err).toBeDefined();
-      }
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Create category failed');
+      });
 
       expect(spy).toHaveBeenCalled();
       spy.mockRestore();
@@ -37,7 +39,8 @@ describe('Category Service', () => {
     it('Should NOT create category (validation error)', async () => {
       await CategoryService.create({}).catch(err => {
         expect(err).toBeDefined();
-        expect(err.message).toContain('Category validation failed');
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Create category failed');
       });
     });
 
@@ -48,7 +51,8 @@ describe('Category Service', () => {
 
       await CategoryService.create(category).catch(err => {
         expect(err).toBeDefined();
-        expect(err.message).toContain('Category validation failed');
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Create category failed');
       });
     });
 
@@ -67,20 +71,11 @@ describe('Category Service', () => {
 
   describe('Get', () => {
     it('Should NOT get categories (model error)', async () => {
-      const spy = jest
-        .spyOn(CategoryModel, 'find')
-        .mockImplementation(() => {
-          throw new Error();
-        });
-
-      try {
-        await CategoryService.get();
-      } catch (err) {
+      await CategoryService.get({ _id: 'test' }).catch(err => {
         expect(err).toBeDefined();
-      }
-
-      expect(spy).toHaveBeenCalled();
-      spy.mockRestore();
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Find category failed');
+      });
     });
 
     it('Should get categories (empty list)', async () => {
@@ -117,26 +112,25 @@ describe('Category Service', () => {
 
   describe('Update', () => {
     it('Should NOT update category (without filters)', async () => {
-      try {
-        await CategoryService.update();
-      } catch (err) {
+      await CategoryService.update().catch(err => {
         expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(CustomError);
         expect(err.message).toBe('Filters not found');
-      }
+      });
     });
 
     it('Should NOT update category (model error)', async () => {
       const spy = jest
         .spyOn(CategoryModel, 'updateMany')
-        .mockImplementation(() => {
+        .mockImplementation(async () => {
           throw new Error();
         });
 
-      try {
-        await CategoryService.update({});
-      } catch (err) {
+      await CategoryService.update({}).catch(err => {
         expect(err).toBeDefined();
-      }
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Update category failed');
+      });
 
       expect(spy).toHaveBeenCalled();
       spy.mockRestore();
@@ -182,28 +176,26 @@ describe('Category Service', () => {
     it('Should NOT delete category (model error)', async () => {
       const spy = jest
         .spyOn(CategoryModel, 'deleteMany')
-        .mockImplementation(() => {
+        .mockImplementation(async () => {
           throw new Error();
         });
 
-      try {
-        await CategoryService.delete({});
-      } catch (err) {
+      await CategoryService.delete({}).catch(err => {
         expect(err).toBeDefined();
-      }
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Delete category failed');
+      });
 
       expect(spy).toHaveBeenCalled();
-
       spy.mockRestore();
     });
 
     it('Should NOT delete category (without filters)', async () => {
-      try {
-        await CategoryService.delete();
-      } catch (err) {
+      await CategoryService.delete().catch(err => {
         expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(CustomError);
         expect(err.message).toBe('Filters not found');
-      }
+      });
     });
 
     it('Should delete category', async () => {
@@ -211,7 +203,9 @@ describe('Category Service', () => {
 
       await CategoryService.delete({ _id });
 
-      const [deletedCategory] = await CategoryService.get({ _id });
+      const [deletedCategory] = await CategoryService.get({
+        _id,
+      });
 
       expect(deletedCategory).toBeUndefined();
     });

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Request } from 'jest-express/lib/request';
 import { Response } from 'jest-express/lib/response';
 
@@ -104,6 +105,52 @@ describe('Transaction Controller', () => {
       expect(mockResponse).toBeInstanceOf(Array);
       expect(mockResponse).toHaveLength(count);
       expect(mockResponse).toMatchSchema(transactionSchema);
+    });
+  });
+
+  describe('Get', () => {
+    it('Should NOT get transaction (service error)', async () => {
+      request.setParams({ id: 'test' });
+      await TransactionController.get(request, response);
+
+      expect(mockResponse.message).toBeDefined();
+      expect(mockResponse.message).toBe('Find transaction failed');
+    });
+
+    it('Should NOT get transaction (transaction not found)', async () => {
+      const id = mongoose.Types.ObjectId();
+
+      request.setParams({ id });
+      await TransactionController.get(request, response);
+
+      expect(mockResponse.message).toBeDefined();
+      expect(mockResponse.message).toBe(
+        `Transaction ${id} not found`
+      );
+    });
+
+    it('Should get transaction', async () => {
+      const { id } = await factory.create('Transaction');
+
+      request.setParams({ id });
+      await TransactionController.get(request, response);
+
+      expect(mockResponse).toBeDefined();
+      expect(mockResponse).toMatchSchema(transactionSchema);
+    });
+
+    it('Should get transaction (with category)', async () => {
+      const { id: category } = await factory.create('Category');
+      const { id } = await factory.create('Transaction', {
+        category,
+      });
+
+      request.setParams({ id });
+      await TransactionController.get(request, response);
+
+      expect(mockResponse).toBeDefined();
+      expect(mockResponse).toMatchSchema(transactionSchema);
+      expect(mockResponse.category).toMatchSchema(categorySchema);
     });
   });
 });

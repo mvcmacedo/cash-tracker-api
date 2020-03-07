@@ -2,6 +2,7 @@ import { TransactionService } from '..';
 
 import { TransactionModel, CategoryModel } from '../../models';
 
+import { CustomError } from '../../helpers';
 import factory from '../../__tests__/factory';
 import { up, down } from '../../__tests__/database';
 
@@ -21,15 +22,15 @@ describe('Transaction Service', () => {
     it('Should NOT create transaction (model error)', async () => {
       const spy = jest
         .spyOn(TransactionModel, 'create')
-        .mockImplementation(() => {
+        .mockImplementation(async () => {
           throw new Error();
         });
 
-      try {
-        await TransactionService.create();
-      } catch (err) {
+      await TransactionService.create().catch(err => {
         expect(err).toBeDefined();
-      }
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Create transaction failed');
+      });
 
       expect(spy).toHaveBeenCalled();
       spy.mockRestore();
@@ -38,9 +39,8 @@ describe('Transaction Service', () => {
     it('Should NOT create transaction (validation error)', async () => {
       await TransactionService.create({}).catch(err => {
         expect(err).toBeDefined();
-        expect(err.message).toContain(
-          'Transaction validation failed'
-        );
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Create transaction failed');
       });
     });
 
@@ -51,9 +51,8 @@ describe('Transaction Service', () => {
 
       await TransactionService.create(transaction).catch(err => {
         expect(err).toBeDefined();
-        expect(err.message).toContain(
-          'Transaction validation failed'
-        );
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Create transaction failed');
       });
     });
 
@@ -83,20 +82,15 @@ describe('Transaction Service', () => {
 
   describe('Get', () => {
     it('Should NOT get transactions (model error)', async () => {
-      const spy = jest
-        .spyOn(TransactionModel, 'find')
-        .mockImplementation(() => {
-          throw new Error();
-        });
-
       try {
-        await TransactionService.get();
+        await TransactionService.get({
+          _id: 'test',
+        });
       } catch (err) {
         expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Find transaction failed');
       }
-
-      expect(spy).toHaveBeenCalled();
-      spy.mockRestore();
     });
 
     it('Should get transactions (empty list)', async () => {
@@ -240,26 +234,25 @@ describe('Transaction Service', () => {
 
   describe('Update', () => {
     it('Should NOT update transaction (without filters)', async () => {
-      try {
-        await TransactionService.update();
-      } catch (err) {
+      await TransactionService.update().catch(err => {
         expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(CustomError);
         expect(err.message).toBe('Filters not found');
-      }
+      });
     });
 
     it('Should NOT update transaction (model error)', async () => {
       const spy = jest
         .spyOn(TransactionModel, 'updateMany')
-        .mockImplementation(() => {
+        .mockImplementation(async () => {
           throw new Error();
         });
 
-      try {
-        await TransactionService.update({});
-      } catch (err) {
+      await TransactionService.update({}).catch(err => {
         expect(err).toBeDefined();
-      }
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Update transaction failed');
+      });
 
       expect(spy).toHaveBeenCalled();
       spy.mockRestore();
@@ -305,28 +298,26 @@ describe('Transaction Service', () => {
     it('Should NOT delete transaction (model error)', async () => {
       const spy = jest
         .spyOn(TransactionModel, 'deleteMany')
-        .mockImplementation(() => {
+        .mockImplementation(async () => {
           throw new Error();
         });
 
-      try {
-        await TransactionService.delete({});
-      } catch (err) {
+      await TransactionService.delete({}).catch(err => {
         expect(err).toBeDefined();
-      }
+        expect(err).toBeInstanceOf(CustomError);
+        expect(err.message).toBe('Delete transaction failed');
+      });
 
       expect(spy).toHaveBeenCalled();
-
       spy.mockRestore();
     });
 
     it('Should NOT delete transaction (without filters)', async () => {
-      try {
-        await TransactionService.delete();
-      } catch (err) {
+      await TransactionService.delete().catch(err => {
         expect(err).toBeDefined();
+        expect(err).toBeInstanceOf(CustomError);
         expect(err.message).toBe('Filters not found');
-      }
+      });
     });
 
     it('Should delete transaction', async () => {

@@ -1,11 +1,18 @@
 import { TransactionModel } from '../models';
 
+import { CustomError } from '../helpers';
+
 class TransactionService {
-  static create(data) {
-    return TransactionModel.create(data);
+  static async create(data) {
+    return TransactionModel.create(data).catch(() => {
+      throw new CustomError('Create transaction failed');
+    });
   }
 
-  static get(filters = {}, { per_page = null, page = null } = {}) {
+  static async get(
+    filters = {},
+    { per_page = null, page = null } = {}
+  ) {
     // before date filter
     if (filters.end) filters.date.$lte = filters.end;
 
@@ -22,31 +29,39 @@ class TransactionService {
      * find transactions with filters,
      * category and pagination, if it exists
      */
+
     return TransactionModel.find(filters)
       .populate('category')
       .limit(per_page)
       .skip(page)
-      .lean();
+      .lean()
+      .catch(() => {
+        throw new CustomError('Find transaction failed');
+      });
   }
 
-  static update(filters, data = {}) {
+  static async update(filters, data = {}) {
     if (!filters) {
-      throw new Error('Filters not found');
+      throw new CustomError('Filters not found', 400);
     }
 
     return TransactionModel.updateMany(
       filters,
       { $set: data },
       { runValidators: true }
-    );
+    ).catch(() => {
+      throw new CustomError('Update transaction failed');
+    });
   }
 
-  static delete(filters) {
+  static async delete(filters) {
     if (!filters) {
-      throw new Error('Filters not found');
+      throw new CustomError('Filters not found', 400);
     }
 
-    return TransactionModel.deleteMany(filters);
+    return TransactionModel.deleteMany(filters).catch(() => {
+      throw new CustomError('Delete transaction failed');
+    });
   }
 }
 

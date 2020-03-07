@@ -1,32 +1,43 @@
 import { CategoryModel } from '../models';
+import { CustomError } from '../helpers';
 
 class CategoryService {
-  static create(data) {
-    return CategoryModel.create(data);
+  static async create(data) {
+    return CategoryModel.create(data).catch(() => {
+      throw new CustomError('Create category failed');
+    });
   }
 
-  static get(filters = {}) {
-    return CategoryModel.find(filters).lean();
+  static async get(filters = {}) {
+    return CategoryModel.find(filters)
+      .lean()
+      .catch(() => {
+        throw new CustomError('Find category failed');
+      });
   }
 
-  static update(filters, data = {}) {
+  static async update(filters, data = {}) {
     if (!filters) {
-      throw new Error('Filters not found');
+      throw new CustomError('Filters not found');
     }
 
     return CategoryModel.updateMany(
       filters,
       { $set: data },
       { runValidators: true }
-    );
+    ).catch(() => {
+      throw new CustomError('Update category failed');
+    });
   }
 
-  static delete(filters) {
+  static async delete(filters) {
     if (!filters) {
-      throw new Error('Filters not found');
+      throw new CustomError('Filters not found');
     }
 
-    return CategoryModel.deleteMany(filters);
+    return CategoryModel.deleteMany(filters).catch(() => {
+      throw new CustomError('Delete category failed');
+    });
   }
 }
 
