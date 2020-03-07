@@ -23,9 +23,7 @@ class TransactionController {
     try {
       const { id: _id } = req.params;
 
-      const [transaction] = await TransactionService.get({
-        _id,
-      });
+      const [transaction] = await TransactionService.get({ _id });
 
       if (!transaction) {
         throw new CustomError(`Transaction ${_id} not found`, 404);
@@ -37,13 +35,59 @@ class TransactionController {
     }
   }
 
-  static async create(req, res) { }
+  static async create(req, res) {
+    try {
+      const transaction = req.body;
 
-  static async udpate(req, res) { }
+      const createdTransaction = await TransactionService.create(
+        transaction
+      );
 
-  static async delete(req, res) { }
+      return res.status(201).send(createdTransaction);
+    } catch ({ http_code, message }) {
+      return res.status(http_code).send({ message });
+    }
+  }
 
-  static async report(req, res) { }
+  static async update(req, res) {
+    try {
+      const { id: _id } = req.params;
+
+      const [transaction] = await TransactionService.get({ _id });
+
+      if (!transaction) {
+        throw new CustomError(`Transaction ${_id} not found`, 404);
+      }
+
+      const data = req.body;
+
+      await TransactionService.update({ _id }, data);
+
+      const [updatedTransaction] = await TransactionService.get({ _id });
+
+      return res.send(updatedTransaction);
+    } catch ({ http_code, message }) {
+      return res.status(http_code).send({ message });
+    }
+  }
+
+  static async delete(req, res) {
+    try {
+      const { id: _id } = req.params;
+
+      const [transaction] = await TransactionService.get({ _id });
+
+      if (!transaction) {
+        throw new CustomError(`Transaction ${_id} not found`, 404);
+      }
+
+      await TransactionService.delete({ _id });
+
+      return res.status(204).send();
+    } catch ({ http_code, message }) {
+      return res.status(http_code).send({ message });
+    }
+  }
 }
 
 export default TransactionController;

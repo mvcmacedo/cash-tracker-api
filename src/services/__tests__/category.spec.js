@@ -59,11 +59,11 @@ describe('Category Service', () => {
     it('Should create category', async () => {
       const category = await factory.build('Category');
 
-      const createdCategory = await CategoryService.create(
-        category
-      ).catch(err => {
-        expect(err).toBeUndefined();
-      });
+      const createdCategory = await CategoryService.create(category).catch(
+        err => {
+          expect(err).toBeUndefined();
+        }
+      );
 
       expect(createdCategory).toBeDefined();
     });

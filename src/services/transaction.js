@@ -9,10 +9,7 @@ class TransactionService {
     });
   }
 
-  static async get(
-    filters = {},
-    { per_page = null, page = null } = {}
-  ) {
+  static async get(filters = {}, { per_page = null, page = null } = {}) {
     // before date filter
     if (filters.end) filters.date.$lte = filters.end;
 
