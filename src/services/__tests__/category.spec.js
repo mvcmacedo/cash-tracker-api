@@ -1,8 +1,11 @@
+import { CategoryService } from '..';
+
 import { CategoryModel } from '../../models';
-import CategoryService from '../category';
 
 import factory from '../../__tests__/factory';
 import { up, down } from '../../__tests__/database';
+
+import { categorySchema } from '../../__tests__/schemas';
 
 const count = 5; // to createMany / buildMany
 
@@ -15,9 +18,11 @@ describe('Category Service', () => {
 
   describe('Create', () => {
     it('Should NOT create category (model error)', async () => {
-      const spy = jest.spyOn(CategoryModel, 'create').mockImplementation(() => {
-        throw new Error();
-      });
+      const spy = jest
+        .spyOn(CategoryModel, 'create')
+        .mockImplementation(() => {
+          throw new Error();
+        });
 
       try {
         await CategoryService.create();
@@ -50,11 +55,11 @@ describe('Category Service', () => {
     it('Should create category', async () => {
       const category = await factory.build('Category');
 
-      const createdCategory = await CategoryService.create(category).catch(
-        err => {
-          expect(err).toBeUndefined();
-        }
-      );
+      const createdCategory = await CategoryService.create(
+        category
+      ).catch(err => {
+        expect(err).toBeUndefined();
+      });
 
       expect(createdCategory).toBeDefined();
     });
@@ -62,9 +67,11 @@ describe('Category Service', () => {
 
   describe('Get', () => {
     it('Should NOT get categories (model error)', async () => {
-      const spy = jest.spyOn(CategoryModel, 'find').mockImplementation(() => {
-        throw new Error();
-      });
+      const spy = jest
+        .spyOn(CategoryModel, 'find')
+        .mockImplementation(() => {
+          throw new Error();
+        });
 
       try {
         await CategoryService.get();
@@ -90,6 +97,7 @@ describe('Category Service', () => {
 
       expect(categories).toBeInstanceOf(Array);
       expect(categories).toHaveLength(count);
+      expect(categories).toMatchSchema(categorySchema);
     });
 
     it('Should get categories (with filters)', async () => {
@@ -102,8 +110,8 @@ describe('Category Service', () => {
 
       expect(categories).toBeInstanceOf(Array);
       expect(categories).toHaveLength(1);
-
-      expect(categories.every(t => t.name === name)).toBeTruthy();
+      expect(categories[0].name).toBe(name);
+      expect(categories).toMatchSchema(categorySchema);
     });
   });
 

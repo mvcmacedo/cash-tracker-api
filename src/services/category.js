@@ -6,7 +6,7 @@ class CategoryService {
   }
 
   static get(filters = {}) {
-    return CategoryModel.find(filters);
+    return CategoryModel.find(filters).lean();
   }
 
   static update(filters, data = {}) {

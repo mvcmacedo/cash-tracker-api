@@ -1,5 +1,6 @@
-import { TransactionModel } from '../../models';
-import TransactionService from '../transaction';
+import { TransactionService } from '..';
+
+import { TransactionModel, CategoryModel } from '../../models';
 
 import factory from '../../__tests__/factory';
 import { up, down } from '../../__tests__/database';
@@ -9,7 +10,10 @@ const count = 5; // to createMany / buildMany
 describe('Transaction Service', () => {
   beforeAll(up); // connect database
 
-  afterEach(() => TransactionModel.deleteMany());
+  afterEach(async () => {
+    await CategoryModel.deleteMany();
+    await TransactionModel.deleteMany();
+  });
 
   afterAll(down); // disconnect database
 
@@ -34,7 +38,9 @@ describe('Transaction Service', () => {
     it('Should NOT create transaction (validation error)', async () => {
       await TransactionService.create({}).catch(err => {
         expect(err).toBeDefined();
-        expect(err.message).toContain('Transaction validation failed');
+        expect(err.message).toContain(
+          'Transaction validation failed'
+        );
       });
     });
 
@@ -45,7 +51,9 @@ describe('Transaction Service', () => {
 
       await TransactionService.create(transaction).catch(err => {
         expect(err).toBeDefined();
-        expect(err.message).toContain('Transaction validation failed');
+        expect(err.message).toContain(
+          'Transaction validation failed'
+        );
       });
     });
 
@@ -60,9 +68,13 @@ describe('Transaction Service', () => {
     it('Should create transaction (with category)', async () => {
       const { id: category } = await factory.create('Category');
 
-      const transaction = await factory.build('Transaction', { category });
+      const transaction = await factory.build('Transaction', {
+        category,
+      });
 
-      const createdTransaction = await TransactionService.create(transaction);
+      const createdTransaction = await TransactionService.create(
+        transaction
+      );
 
       expect(createdTransaction).toBeDefined();
       expect(String(createdTransaction.category)).toBe(category);
@@ -109,7 +121,9 @@ describe('Transaction Service', () => {
       await factory.create('Transaction');
       await factory.create('Transaction', { description });
 
-      const transactions = await TransactionService.get({ description });
+      const transactions = await TransactionService.get({
+        description,
+      });
 
       expect(transactions).toBeInstanceOf(Array);
       expect(transactions).toHaveLength(1);
@@ -117,6 +131,110 @@ describe('Transaction Service', () => {
       expect(
         transactions.every(t => t.description === description)
       ).toBeTruthy();
+    });
+
+    it('Should get transactions (start date)', async () => {
+      const today = new Date();
+
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+      await factory.create('Transaction', { date: today });
+      await factory.create('Transaction', { date: nextMonth });
+
+      const transactions = await TransactionService.get({
+        date: { $gte: nextMonth },
+      });
+
+      expect(transactions).toHaveLength(1);
+      expect(transactions[0].date).toEqual(nextMonth);
+    });
+
+    it('Should get transactions (end date)', async () => {
+      const today = new Date();
+
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+      await factory.create('Transaction', { date: today });
+      await factory.create('Transaction', { date: nextMonth });
+
+      const transactions = await TransactionService.get({
+        date: { $lte: today },
+      });
+
+      expect(transactions).toHaveLength(1);
+      expect(transactions[0].date).toEqual(today);
+    });
+
+    it('Should get transactions (date range)', async () => {
+      const today = new Date();
+
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+      const twoMonthsAhead = new Date();
+      twoMonthsAhead.setMonth(twoMonthsAhead.getMonth() + 2);
+
+      await factory.create('Transaction', { date: today });
+      await factory.create('Transaction', { date: nextMonth });
+
+      const transactions = await TransactionService.get({
+        date: { $gte: today, $lte: nextMonth },
+      });
+
+      expect(transactions).toHaveLength(2);
+      expect(transactions[0].date).toEqual(today);
+      expect(transactions[1].date).toEqual(nextMonth);
+    });
+
+    it('Should get transactions (paginate)', async () => {
+      await factory.createMany('Transaction', 20);
+
+      const allTransactions = await TransactionService.get();
+
+      const transactions = await TransactionService.get(
+        {},
+        {
+          page: 2,
+          per_page: 10,
+        }
+      );
+
+      expect(transactions).toHaveLength(10);
+
+      expect(allTransactions).toEqual(
+        expect.arrayContaining(transactions)
+      );
+    });
+
+    it('Should get transactions (with category)', async () => {
+      const { id: category } = await factory.create('Category');
+
+      const { _id } = await factory.create('Transaction', {
+        category,
+      });
+
+      const [transaction] = await TransactionService.get({ _id });
+
+      expect(transaction).toBeDefined();
+      expect(transaction.category).toBeDefined();
+      expect(transaction.category).toBeInstanceOf(Object);
+    });
+
+    it('Should get transactions (by category)', async () => {
+      const { id: category } = await factory.create('Category');
+
+      await factory.create('Transaction');
+
+      await factory.create('Transaction', {
+        category,
+      });
+
+      const transactions = await TransactionService.get({ category });
+
+      expect(transactions).toHaveLength(1);
+      expect(transactions[0].category).toBeDefined();
     });
   });
 
@@ -216,7 +334,9 @@ describe('Transaction Service', () => {
 
       await TransactionService.delete({ _id });
 
-      const [deletedTransaction] = await TransactionService.get({ _id });
+      const [deletedTransaction] = await TransactionService.get({
+        _id,
+      });
 
       expect(deletedTransaction).toBeUndefined();
     });
@@ -224,13 +344,17 @@ describe('Transaction Service', () => {
     it('Should delete multiple transaction', async () => {
       const description = 'test';
       await factory.createMany('Transaction', count, { description });
-      const createdTransactions = await TransactionService.get({ description });
+      const createdTransactions = await TransactionService.get({
+        description,
+      });
 
       expect(createdTransactions).toHaveLength(count);
 
       await TransactionService.delete({ description });
 
-      const transactions = await TransactionService.get({ description });
+      const transactions = await TransactionService.get({
+        description,
+      });
 
       expect(transactions).toHaveLength(0);
     });
