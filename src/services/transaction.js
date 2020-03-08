@@ -43,6 +43,7 @@ class TransactionService {
       .populate('category')
       .limit(Number(per_page))
       .skip(Number(page))
+      .sort('-date')
       .lean()
       .catch(() => {
         throw new CustomError('Find transaction failed');

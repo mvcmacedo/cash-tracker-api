@@ -186,8 +186,8 @@ describe('Transaction Service', () => {
       });
 
       expect(transactions).toHaveLength(2);
-      expect(transactions[0].date).toEqual(today);
-      expect(transactions[1].date).toEqual(nextMonth);
+      expect(transactions[1].date).toEqual(today);
+      expect(transactions[0].date).toEqual(nextMonth);
     });
 
     it('Should get transactions (min amount)', async () => {

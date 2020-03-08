@@ -35,10 +35,7 @@ class CategorySchema {
               .string()
               .max(15)
               .required(),
-            description: joi
-              .string()
-              .max(100)
-              .required(),
+            description: joi.string().max(100),
             color: joi.string(),
             icon: joi.string(),
           })
