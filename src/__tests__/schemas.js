@@ -7,7 +7,7 @@ import {
 } from '../enums';
 
 const transaction = {
-  _id: joi.object(),
+  _id: joi.alternatives().try(joi.object(), joi.string()),
   description: joi
     .string()
     .max(100)
@@ -55,7 +55,7 @@ const transactionSchema = joi
   );
 
 const category = {
-  _id: joi.object(),
+  _id: joi.alternatives().try(joi.object(), joi.string()),
   name: joi
     .string()
     .max(15)

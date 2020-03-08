@@ -11,16 +11,28 @@ class TransactionService {
 
   static async get(filters = {}, { per_page = null, page = null } = {}) {
     // before date filter
-    if (filters.end) filters.date.$lte = filters.end;
+    if (filters.end) {
+      filters.date = { $lte: filters.end };
+      delete filters.end;
+    }
 
     // after date filter
-    if (filters.start) filters.date.$gte = filters.start;
+    if (filters.start) {
+      filters.date = { $gte: filters.start };
+      delete filters.start;
+    }
 
     // minimum amount filter
-    if (filters.minAmount) filters.amount.$gte = filters.minAmount;
+    if (filters.minAmount) {
+      filters.amount = { $gte: filters.minAmount };
+      delete filters.minAmount;
+    }
 
     // maximum amount filter
-    if (filters.maxAmount) filters.amount.$lte = filters.maxAmount;
+    if (filters.maxAmount) {
+      filters.amount = { $lte: filters.maxAmount };
+      delete filters.maxAmount;
+    }
 
     /**
      * find transactions with filters,
@@ -29,8 +41,8 @@ class TransactionService {
 
     return TransactionModel.find(filters)
       .populate('category')
-      .limit(per_page)
-      .skip(page)
+      .limit(Number(per_page))
+      .skip(Number(page))
       .lean()
       .catch(() => {
         throw new CustomError('Find transaction failed');

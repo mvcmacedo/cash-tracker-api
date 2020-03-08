@@ -21,10 +21,12 @@ class App {
   }
 
   database() {
-    mongoose.connect(process.env.DB_HOST, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    if (process.env.NODE_ENV !== 'test') {
+      mongoose.connect(process.env.DB_HOST, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      });
+    }
   }
 
   routes() {
