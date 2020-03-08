@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  app:
+    container_name: cash-tracker-app
+    build: .
+    env_file:
+      - ./.env
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    volumes:
+      - .:/usr/app
+    command: yarn start
+  mongodb:
+    image: mongo
+    container_name: cash-tracker-mongo
+    ports:
+      - "27017:27017"

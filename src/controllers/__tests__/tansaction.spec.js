@@ -39,6 +39,14 @@ describe('Transaction Controller', () => {
   describe('List', () => {
     const count = 5;
 
+    it('Should NOT list transactions', async () => {
+      request.setQuery({ _id: 'test' });
+      await TransactionController.list(request, response);
+
+      expect(mockResponse.message).toBeDefined();
+      expect(mockResponse.message).toBe('Find transaction failed');
+    });
+
     it('Should list transactions', async () => {
       await TransactionController.list(request, response);
 

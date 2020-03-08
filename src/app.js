@@ -21,12 +21,16 @@ class App {
   }
 
   database() {
-    if (process.env.NODE_ENV !== 'test') {
-      mongoose.connect(process.env.DB_HOST, {
+    if (process.env.NODE_ENV === 'test') return;
+
+    mongoose
+      .connect(process.env.DB_HOST, {
+        useCreateIndex: true,
         useNewUrlParser: true,
+        useFindAndModify: false,
         useUnifiedTopology: true,
-      });
-    }
+      })
+      .then(() => console.log('Database connected'));
   }
 
   routes() {

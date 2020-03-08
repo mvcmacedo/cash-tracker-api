@@ -33,6 +33,14 @@ describe('Category Controller', () => {
   describe('List', () => {
     const count = 5;
 
+    it('Should NOT list categories', async () => {
+      request.setQuery({ _id: 'test' });
+      await CategoryController.list(request, response);
+
+      expect(mockResponse.message).toBeDefined();
+      expect(mockResponse.message).toBe('Find category failed');
+    });
+
     it('Should list categories', async () => {
       await CategoryController.list(request, response);
 

@@ -137,7 +137,7 @@ describe('Transaction Service', () => {
       await factory.create('Transaction', { date: nextMonth });
 
       const transactions = await TransactionService.get({
-        date: { $gte: nextMonth },
+        start: nextMonth,
       });
 
       expect(transactions).toHaveLength(1);
@@ -154,7 +154,7 @@ describe('Transaction Service', () => {
       await factory.create('Transaction', { date: nextMonth });
 
       const transactions = await TransactionService.get({
-        date: { $lte: today },
+        end: today,
       });
 
       expect(transactions).toHaveLength(1);
@@ -170,16 +170,63 @@ describe('Transaction Service', () => {
       const twoMonthsAhead = new Date();
       twoMonthsAhead.setMonth(twoMonthsAhead.getMonth() + 2);
 
-      await factory.create('Transaction', { date: today });
-      await factory.create('Transaction', { date: nextMonth });
+      await factory.create('Transaction', { date: today.toISOString() });
+
+      await factory.create('Transaction', {
+        date: nextMonth.toISOString(),
+      });
+
+      await factory.create('Transaction', {
+        date: twoMonthsAhead.toISOString(),
+      });
 
       const transactions = await TransactionService.get({
-        date: { $gte: today, $lte: nextMonth },
+        start: today.toISOString(),
+        end: nextMonth.toISOString(),
       });
 
       expect(transactions).toHaveLength(2);
       expect(transactions[0].date).toEqual(today);
       expect(transactions[1].date).toEqual(nextMonth);
+    });
+
+    it('Should get transactions (min amount)', async () => {
+      await factory.create('Transaction', { amount: 10 });
+      await factory.create('Transaction', { amount: 20 });
+
+      const transactions = await TransactionService.get({
+        minAmount: 15,
+      });
+
+      expect(transactions).toHaveLength(1);
+      expect(transactions[0].amount).toEqual(20);
+    });
+
+    it('Should get transactions (max amount)', async () => {
+      await factory.create('Transaction', { amount: 10 });
+      await factory.create('Transaction', { amount: 20 });
+
+      const transactions = await TransactionService.get({
+        maxAmount: 15,
+      });
+
+      expect(transactions).toHaveLength(1);
+      expect(transactions[0].amount).toEqual(10);
+    });
+
+    it('Should get transactions (amount range)', async () => {
+      await factory.create('Transaction', { amount: 10 });
+      await factory.create('Transaction', { amount: 20 });
+      await factory.create('Transaction', { amount: 30 });
+
+      const transactions = await TransactionService.get({
+        minAmount: 10,
+        maxAmount: 25,
+      });
+
+      expect(transactions).toHaveLength(2);
+      expect(transactions[0].amount).toEqual(10);
+      expect(transactions[1].amount).toEqual(20);
     });
 
     it('Should get transactions (paginate)', async () => {

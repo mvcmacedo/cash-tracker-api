@@ -10,8 +10,8 @@ class CategoryController {
       const categories = await CategoryService.get(filters);
 
       return res.send(categories);
-    } catch (error) {
-      return res.send(error);
+    } catch ({ http_code, message }) {
+      return res.status(http_code).send({ message });
     }
   }
 

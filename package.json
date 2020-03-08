@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon ./src/index.js",
     "start": "sucrase-node ./src/index.js",
-    "test": "jest --runInBand --verbose",
+    "test": "jest --runInBand --verbose --coverage",
     "lint": "eslint --fix src --ext .js"
   },
   "dependencies": {

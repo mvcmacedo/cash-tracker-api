@@ -14,8 +14,8 @@ class TransactionController {
       );
 
       return res.send(transactions);
-    } catch (error) {
-      return res.send(error);
+    } catch ({ http_code, message }) {
+      return res.status(http_code).send({ message });
     }
   }
 
