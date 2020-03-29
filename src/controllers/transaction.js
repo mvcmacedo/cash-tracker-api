@@ -88,6 +88,22 @@ class TransactionController {
       return res.status(http_code).send({ message });
     }
   }
+
+  static async sumByType(req, res) {
+    try {
+      const filters = req.query;
+      const { groupBy } = req.params;
+
+      const transactions = await TransactionService.sumByType(
+        filters,
+        groupBy
+      );
+
+      return res.send(transactions);
+    } catch ({ http_code, message }) {
+      return res.status(http_code).send({ message });
+    }
+  }
 }
 
 export default TransactionController;

@@ -1,3 +1,5 @@
+import mongoose from 'mongoose';
+
 import { TransactionModel } from '../models';
 
 import { CustomError } from '../helpers';
@@ -48,6 +50,38 @@ class TransactionService {
       .catch(() => {
         throw new CustomError('Find transaction failed');
       });
+  }
+
+  static async sumByType(filters = {}, groupBy) {
+    // before date filter
+    if (filters.end) {
+      filters.date = { $lte: new Date(filters.end), ...filters.date };
+      delete filters.end;
+    }
+
+    // after date filter
+    if (filters.start) {
+      filters.date = { $gte: new Date(filters.start), ...filters.date };
+      delete filters.start;
+    }
+
+    if (filters.category)
+      filters.category = mongoose.Types.ObjectId(filters.category);
+
+    return TransactionModel.aggregate()
+      .match(filters)
+      .group({
+        _id: `$${groupBy}`,
+        totalAmount: { $sum: '$amount' },
+        count: { $sum: 1 },
+      })
+      .lookup({
+        from: 'categories',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'category',
+      })
+      .sort('-totalAmount');
   }
 
   static async update(filters, data = {}) {

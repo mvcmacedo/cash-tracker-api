@@ -47,6 +47,52 @@ class TransactionSchema {
       .required();
   }
 
+  static totals() {
+    return joi
+      .object({
+        params: joi
+          .object({
+            groupBy: joi
+              .string()
+              .valid('type', 'category', 'frequency', 'method')
+              .required(),
+          })
+          .required(),
+        query: joi.object({
+          start: joi.date(),
+          end: joi.date(),
+          date: joi.date(),
+          method: joi
+            .string()
+            .valid(
+              transactionMethods.CASH,
+              transactionMethods.CREDIT,
+              transactionMethods.DEBIT,
+              transactionMethods.SLIP,
+              transactionMethods.TED
+            ),
+          type: joi
+            .string()
+            .valid(
+              transactionTypes.CASHIN,
+              transactionTypes.CASHOUT,
+              transactionTypes.CREDIT,
+              transactionTypes.INVESTMENT
+            ),
+          frequency: joi
+            .string()
+            .valid(
+              transactionFrequency.FIXED,
+              transactionFrequency.VARIABLE,
+              transactionFrequency.UNPLANNED
+            ),
+          category: joi.string(),
+        }),
+      })
+      .unknown(true)
+      .required();
+  }
+
   static post() {
     return joi
       .object({

@@ -32,4 +32,10 @@ router
     TransactionController.delete
   );
 
+router.get(
+  '/totals/:groupBy',
+  SchemaValidator.validate(TransactionSchema.totals()),
+  TransactionController.sumByType
+);
+
 export default router;
